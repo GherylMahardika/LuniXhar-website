@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chatbot | LuniXhar</title>
+    <link rel="icon" type="image/png" href="assets/lunixharlogo.png" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+    <script src="https://kit.fontawesome.com/b497db0dc1.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+
+<body class="flex min-h-screen bg-[#f2f7ff] text-black">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r rounded-tr-[18px] rounded-br-[18px] fixed top-0 left-0 h-screen flex flex-col items-center z-10">
+        <div class="p-6 border-b w-full flex justify-center">
+            <img src="assets/lunixharlogo.png" alt="Logo" class="h-32 mt-4 mb-4" />
+        </div>
+        <nav class="flex-1 p-4 w-full">
+            <ul class="space-y-4 w-full">
+                <li>
+                    <a href="index.html" class="flex items-center px-4 py-3 pl-6 rounded-xl hover:bg-gray-200 text-black font-bold">
+                        <i class="fa-solid fa-chart-line mr-3"></i> Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="asosiasi.html" class="flex items-center px-4 py-3 pl-6 rounded-xl hover:bg-gray-200 text-black font-bold">
+                        <i class="fa-solid fa-layer-group mr-3"></i> Asosiasi
+                    </a>
+                </li>
+                <li>
+                    <a href="monitor.html" class="flex items-center px-4 py-3 pl-6 rounded-xl hover:bg-gray-200 text-black font-bold">
+                        <i class="fa-solid fa-video mr-3"></i> Kamera
+                    </a>
+                </li>
+                <li>
+                    <a href="chatbot.html" class="flex items-center px-4 py-3 pl-6 rounded-xl bg-black text-white font-bold">
+                        <i class="fa-solid fa-robot mr-3"></i> Chatbot
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="ml-64 flex-1 p-6 flex flex-col h-screen">
+        <h1 class="text-3xl font-bold mb-4 text-center flex-shrink-0">Tanyakan Mengenai Tren Hari Ini</h1>
+
+        <!-- Area Chat -->
+        <section class="w-full max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-lg flex flex-col flex-grow min-h-0">
+
+            <!-- Kotak Pesan Chat (Akan scrollable) -->
+            <div id="chatMessages" class="flex-1 overflow-y-auto space-y-4 pr-2 hide-scrollbar">
+                <!-- Pesan Chat akan dimasukkan di sini oleh JavaScript -->
+            </div>
+
+            <!-- Filter Kata Kunci (Saran Pertanyaan) -->
+            <div class="overflow-x-auto hide-scrollbar mt-4 mb-2">
+                <div class="flex gap-4 w-max px-1">
+                    <!-- Grup: Trend -->
+                    <div class="flex flex-col bg-gray-100 rounded-xl p-2">
+                        <span class="font-semibold text-gray-700 mb-1 px-3 text-sm">Trend</span>
+                        <div class="flex flex-wrap gap-2 px-2">
+                            <button class="keyword-btn bg-black text-white px-4 py-2 rounded-full text-sm hover:bg-gray-800 transition-colors">Trend hari ini</button>
+                        </div>
+                    </div>
+
+                    <!-- Grup: Asosiasi -->
+                    <div class="flex flex-col bg-gray-100 rounded-xl p-2">
+                        <span class="font-semibold text-gray-700 mb-1 px-3 text-sm">Asosiasi</span>
+                        <div class="flex flex-wrap gap-2 px-2">
+                            <button class="keyword-btn bg-black text-white px-4 py-2 rounded-full text-sm hover:bg-gray-800 transition-colors" data-category="asosiasi">Clapping</button>
+                            <button class="keyword-btn bg-black text-white px-4 py-2 rounded-full text-sm hover:bg-gray-800 transition-colors" data-category="asosiasi">Sitting</button>
+                            <button class="keyword-btn bg-black text-white px-4 py-2 rounded-full text-sm hover:bg-gray-800 transition-colors" data-category="asosiasi">Standing still</button>
+                            <button class="keyword-btn bg-black text-white px-4 py-2 rounded-full text-sm hover:bg-gray-800 transition-colors" data-category="asosiasi">Walking</button>
+                            <button class="keyword-btn bg-black text-white px-4 py-2 rounded-full text-sm hover:bg-gray-800 transition-colors" data-category="asosiasi">Walking with a phone</button>
+                            <button class="keyword-btn bg-black text-white px-4 py-2 rounded-full text-sm hover:bg-gray-800 transition-colors" data-category="asosiasi">Walking with a book</button>
+                            <button class="keyword-btn bg-black text-white px-4 py-2 rounded-full text-sm hover:bg-gray-800 transition-colors" data-category="asosiasi">Meet and split</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Area Input Pengguna -->
+            <div class="relative mt-2 flex-shrink-0">
+                <textarea id="userInput" rows="2" class="w-full p-4 pr-24 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black resize-none" placeholder="Tanyakan sesuatu atau klik ikon mikrofon..."></textarea>
+                <!-- Tombol Mic -->
+                <button id="microphoneButton" class="absolute bottom-3 right-16 bg-black text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-gray-700 transition-colors" aria-label="Gunakan mikrofon">
+                    <i class="fa-solid fa-microphone text-sm"></i>
+                </button>
+                <!-- Tombol Kirim -->
+                <button id="sendButton" class="absolute bottom-3 right-3 bg-black text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-gray-800 transition-colors" aria-label="Kirim pesan">
+                    <i class="fa-solid fa-paper-plane text-sm"></i>
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // -- Elemen DOM --
+            const sendButton = document.getElementById("sendButton");
+            const userInput = document.getElementById("userInput");
+            const chatMessages = document.getElementById("chatMessages");
+            const keywordButtons = document.querySelectorAll('.keyword-btn');
+            const microphoneButton = document.getElementById("microphoneButton");
+
+            // -- Variabel State Global --
+            let activeTtsButton = null;
+            let currentUtterance = null;
+
+            // -- Fungsi-fungsi --
+
+            /**
+             * Mengontrol pemutaran dan penghentian audio text-to-speech.
+             * @param {string} text - Teks yang akan dibacakan.
+             * @param {HTMLButtonElement} button - Tombol yang diklik.
+             */
+            function toggleSpeech(text, button) {
+                const wasPlaying = window.speechSynthesis.speaking;
+                const wasSameButton = button === activeTtsButton;
+
+                // Selalu hentikan audio yang mungkin sedang berjalan.
+                if (wasPlaying) {
+                    // Hapus event listener dari utterance sebelumnya untuk mencegahnya mereset ikon
+                    if (currentUtterance) {
+                        currentUtterance.onend = null;
+                    }
+                    // Reset ikon tombol yang aktif sebelumnya secara manual
+                    if (activeTtsButton) {
+                        activeTtsButton.innerHTML = '<i class="fas fa-volume-up"></i>';
+                    }
+                    window.speechSynthesis.cancel();
+                }
+
+                // Jika tombol yang sama diklik (fungsi stop), kita selesai di sini.
+                if (wasPlaying && wasSameButton) {
+                    activeTtsButton = null;
+                    currentUtterance = null;
+                    return;
+                }
+
+                // Jika tidak, mulai audio baru.
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'id-ID';
+                utterance.rate = 0.9;
+
+                // Handler saat audio selesai secara alami
+                utterance.onend = () => {
+                    button.innerHTML = '<i class="fas fa-volume-up"></i>';
+                    activeTtsButton = null;
+                    currentUtterance = null;
+                };
+
+                // Perbarui state untuk tombol dan utterance yang baru
+                button.innerHTML = '<i class="fas fa-stop-circle text-red-500"></i>';
+                activeTtsButton = button;
+                currentUtterance = utterance;
+
+                window.speechSynthesis.speak(utterance);
+            }
+
+
+            function addChatBubble(message, sender = 'user') {
+                const bubble = document.createElement("div");
+                bubble.className = `max-w-[75%] px-4 py-2 rounded-xl text-sm shadow break-words ${
+                    sender === 'user' ? 'self-end bg-gray-200' : 'self-start bg-gray-100'
+                }`;
+                bubble.textContent = message;
+
+                const wrapper = document.createElement("div");
+                wrapper.className = `flex w-full items-center gap-2 ${
+                    sender === 'user' ? 'justify-end' : 'justify-start group'
+                }`;
+
+                if (sender === 'user') {
+                    wrapper.appendChild(bubble);
+                } else {
+                    wrapper.appendChild(bubble);
+
+                    const ttsButton = document.createElement('button');
+                    ttsButton.className = 'text-gray-400 hover:text-black opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0';
+                    ttsButton.setAttribute('aria-label', 'Dengarkan pesan');
+                    ttsButton.innerHTML = '<i class="fas fa-volume-up"></i>';
+                    
+                    ttsButton.onclick = () => toggleSpeech(message, ttsButton);
+                    
+                    wrapper.appendChild(ttsButton);
+                }
+
+                chatMessages.appendChild(wrapper);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            function sendMessage() {
+                const message = userInput.value.trim();
+                if (!message) return;
+
+                addChatBubble(message, "user");
+                userInput.value = "";
+
+                if (isListening) {
+                    recognition.stop();
+                }
+
+                // Tampilkan indikator loading sementara
+                const loadingBubble = document.createElement("div");
+                loadingBubble.className = "max-w-[75%] px-4 py-2 rounded-xl text-sm shadow bg-gray-100 self-start";
+                loadingBubble.textContent = "Sedang memproses...";
+                const loadingWrapper = document.createElement("div");
+                loadingWrapper.className = "flex w-full items-center gap-2 justify-start";
+                loadingWrapper.appendChild(loadingBubble);
+                chatMessages.appendChild(loadingWrapper);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                // Panggil API chatbot
+                fetch("https://lunix-chat-bot-api-901050835625.asia-southeast2.run.app/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: message })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Hapus bubble loading
+                    chatMessages.removeChild(loadingWrapper);
+
+                    const reply = data.response || "Maaf, terjadi kesalahan.";
+                    addChatBubble(reply, "bot");
+                })
+                .catch(error => {
+                    chatMessages.removeChild(loadingWrapper);
+                    console.error("Gagal memanggil API:", error);
+                    addChatBubble("Terjadi kesalahan saat memproses permintaan Anda.", "bot");
+                });
+            }
+
+
+            // -- Event Listeners Chat --
+            sendButton.addEventListener("click", sendMessage);
+            userInput.addEventListener("keydown", (e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+            keywordButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const category = btn.dataset.category;
+                    const text = btn.textContent.trim();
+                    const fullMessage = category ? `${category} ${text}` : text;
+                    userInput.value = fullMessage;
+                    sendMessage();
+                });
+            });
+
+            // -- Logika untuk Speech-to-Text (Mikrofon) --
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            let recognition;
+            let isListening = false;
+            const originalPlaceholder = userInput.placeholder;
+            let finalTranscript = ''; 
+
+            if (SpeechRecognition) {
+                recognition = new SpeechRecognition();
+                recognition.continuous = true; 
+                recognition.lang = 'id-ID';    
+                recognition.interimResults = true; 
+
+                microphoneButton.addEventListener('click', () => {
+                    if (isListening) {
+                        recognition.stop();
+                    } else {
+                        recognition.start();
+                    }
+                });
+
+                recognition.onstart = () => {
+                    finalTranscript = ''; 
+                    isListening = true;
+                    userInput.placeholder = "Sekarang mendengarkan..."; 
+                };
+
+                recognition.onend = () => {
+                    isListening = false;
+                    userInput.placeholder = originalPlaceholder; 
+                };
+
+                recognition.onerror = (event) => {
+                    console.error("Error pada speech recognition: ", event.error);
+                    userInput.placeholder = originalPlaceholder; 
+                    isListening = false;
+                };
+
+                recognition.onresult = (event) => {
+                    let interimTranscript = '';
+                    for (let i = event.resultIndex; i < event.results.length; ++i) {
+                        if (event.results[i].isFinal) {
+                            finalTranscript += event.results[i][0].transcript;
+                        } else {
+                            interimTranscript += event.results[i][0].transcript;
+                        }
+                    }
+                    userInput.value = finalTranscript + interimTranscript;
+                };
+
+            } else {
+                console.log("Browser tidak mendukung Web Speech API untuk mikrofon.");
+                microphoneButton.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+
+</html>

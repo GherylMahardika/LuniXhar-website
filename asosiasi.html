@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Asosiasi | LuniXhar</title>
+    <link rel="icon" type="image/png" href="assets/lunixharlogo.png" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+    <script src="https://kit.fontawesome.com/b497db0dc1.js" crossorigin="anonymous"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="flex min-h-screen bg-[#f2f7ff] text-black">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r rounded-tr-[18px] rounded-br-[18px] fixed top-0 left-0 h-screen flex flex-col items-center z-10">
+        <div class="p-6 border-b w-full flex justify-center">
+            <!-- PERUBAHAN: h-16 diubah menjadi h-20 untuk memperbesar logo -->
+            <img src="assets/lunixharlogo.png" alt="Logo" class="h-32 mt-4 mb-4" />
+        </div>
+        <nav class="flex-1 p-4 w-full">
+            <ul class="space-y-4 w-full">
+                <li>
+                    <a href="index.html" class="flex items-center px-4 py-3 pl-6 rounded-xl hover:bg-gray-200 text-black font-bold">
+                        <i class="fa-solid fa-chart-line mr-3"></i> Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="asosiasi.html" class="flex items-center px-4 py-3 pl-6 rounded-xl bg-black text-white font-bold">
+                        <i class="fa-solid fa-layer-group mr-3"></i> Asosiasi
+                    </a>
+                </li>
+                <li>
+                    <a href="monitor.html" class="flex items-center px-4 py-3 pl-6 rounded-xl hover:bg-gray-200 text-black font-bold">
+                        <i class="fa-solid fa-video mr-3"></i> Kamera
+                    </a>
+                </li>
+                <li>
+                    <a href="chatbot.html" class="flex items-center px-4 py-3 pl-6 rounded-xl hover:bg-gray-200 text-black font-bold">
+                        <i class="fa-solid fa-robot mr-3"></i> Chatbot
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="ml-64 flex-1 p-8">
+        <h1 class="text-3xl font-bold mb-6">Analisis Asosiasi</h1>
+
+        <!-- Ringkasan Gerakan -->
+        <section aria-labelledby="ringkasan-gerakan" class="mb-6">
+            <h2 id="ringkasan-gerakan" class="sr-only">Ringkasan Gerakan</h2> <!-- Judul untuk screen reader -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Card Gerakan Sering Terjadi -->
+                <div class="bg-white p-6 rounded-xl shadow">
+                    <h3 class="text-lg font-semibold mb-4">Gerakan yang Sering Terjadi</h3>
+                    <ul class="list-disc list-inside text-gray-700 space-y-2">
+                    </ul>
+                </div>
+                <!-- Card Gerakan Jarang Terjadi -->
+                <div class="bg-white p-6 rounded-xl shadow">
+                    <h3 class="text-lg font-semibold mb-4">Gerakan yang Jarang Terjadi</h3>
+                    <ul class="list-disc list-inside text-gray-700 space-y-2">
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Filter Data -->
+        <section aria-labelledby="filter-data" class="mb-6">
+            <div class="bg-white p-6 rounded-xl shadow">
+                <h3 id="filter-data" class="text-lg font-semibold mb-4">Filter Waktu</h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    <!-- Dropdown Hari -->
+                    <div>
+                        <label for="filterDay" class="block text-sm font-medium text-gray-700">Hari</label>
+                        <select id="filterDay" name="day" class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-black focus:border-black">
+                            <option value="">Semua</option>
+                            <!-- Opsi hari akan ditambahkan di sini oleh JavaScript jika diperlukan -->
+                        </select>
+                    </div>
+
+                    <!-- Dropdown Bulan -->
+                    <div>
+                        <label for="filterMonth" class="block text-sm font-medium text-gray-700">Bulan</label>
+                        <select id="filterMonth" name="month" class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-black focus:border-black">
+                            <option value="">Semua</option>
+                            <option value="1">Januari</option>
+                            <option value="2">Februari</option>
+                            <option value="3">Maret</option>
+                            <option value="4">April</option>
+                            <option value="5">Mei</option>
+                            <option value="6">Juni</option>
+                            <option value="7">Juli</option>
+                            <option value="8">Agustus</option>
+                            <option value="9">September</option>
+                            <option value="10">Oktober</option>
+                            <option value="11">November</option>
+                            <option value="12">Desember</option>
+                        </select>
+                    </div>
+
+                    <!-- Dropdown Tahun -->
+                    <div>
+                        <label for="filterYear" class="block text-sm font-medium text-gray-700">Tahun</label>
+                        <select id="filterYear" name="year" class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-black focus:border-black">
+                            <option value="">Semua</option>
+                            <option value="2024">2024</option>
+                            <option value="2025">2025</option>
+                        </select>
+                    </div>
+
+                    <!-- Tombol Filter -->
+                    <div>
+                        <button class="w-full bg-black text-white py-2 px-4 rounded-lg hover:bg-gray-800 transition-colors">Tampilkan</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tabel Data Asosiasi -->
+        <section aria-labelledby="data-asosiasi">
+            <div class="bg-white p-6 rounded-xl shadow">
+                <h3 id="data-asosiasi" class="text-md font-semibold mb-4">Detail Data Asosiasi Gerakan</h3>
+                <div class="overflow-x-auto">
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        async function fetchAssociationData(day = null, month = null, year = null) {
+            const params = new URLSearchParams();
+            if (day) params.append("day", day);
+            if (month) params.append("month", month);
+            if (year) params.append("year", year);
+
+            try {
+                const res = await fetch(`https://lunix-dm-api-901050835625.asia-southeast2.run.app/api/association-rules?${params.toString()}`);
+                if (!res.ok) throw new Error("Failed to fetch");
+
+                const data = await res.json();
+
+                const associationContainer = document.querySelector("#data-asosiasi .overflow-x-auto");
+                const seringList = document.querySelectorAll("section[aria-labelledby='ringkasan-gerakan'] ul")[0];
+                const jarangList = document.querySelectorAll("section[aria-labelledby='ringkasan-gerakan'] ul")[1];
+
+                if (!data.frequent_itemsets || data.frequent_itemsets.length === 0) {
+                    associationContainer.innerHTML = "<p class='text-gray-500'>Tidak ada data asosiasi untuk periode ini.</p>";
+                    seringList.innerHTML = "<li>-</li>";
+                    jarangList.innerHTML = "<li>-</li>";
+                    return;
+                }
+
+                // Sort by support
+                const sortedItemsets = [...data.frequent_itemsets].sort((a, b) => b.support - a.support);
+
+                // Extract top 3 frequent
+                const top = sortedItemsets.slice(0, 3).map(item => `<li>${item.itemset.join(', ')}</li>`).join('');
+                // Extract bottom 3 rare
+                const bottom = sortedItemsets.slice(-3).map(item => `<li>${item.itemset.join(', ')}</li>`).join('');
+
+                seringList.innerHTML = top || "<li>-</li>";
+                jarangList.innerHTML = bottom || "<li>-</li>";
+
+                // Render rules (optional)
+                associationContainer.innerHTML = `
+                    <table class="min-w-full table-auto">
+                        <thead>
+                            <tr>
+                                <th class="px-4 py-2 text-left">Aturan</th>
+                                <th class="px-4 py-2 text-left">Confidence</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-gray-700">
+                            ${data.association_rules.map(rule => `
+                                <tr>
+                                    <td class="border-t px-4 py-2">${rule.antecedent.join(', ')} → ${rule.consequent.join(', ')}</td>
+                                    <td class="border-t px-4 py-2">${(rule.confidence * 100).toFixed(2)}%</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (error) {
+                console.error("Gagal mengambil data asosiasi:", error);
+                document.querySelector("#data-asosiasi .overflow-x-auto").innerHTML = `<p class="text-red-500">Gagal memuat data asosiasi.</p>`;
+            }
+        }
+
+        // Fix element selection and error handling
+        document.addEventListener('DOMContentLoaded', function () {
+            // Populate day dropdown
+            const daySelect = document.getElementById('filterDay');
+            for (let i = 1; i <= 31; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                daySelect.appendChild(option);
+            }
+
+            // Auto-fetch today's data
+            fetchAssociationData();
+            });
+
+            async function renderDetailedAssociation(day = null, month = null, year = null) {
+            const params = new URLSearchParams();
+            if (day) params.append("day", day);
+            if (month) params.append("month", month);
+            if (year) params.append("year", year);
+
+            try {
+                const res = await fetch(`https://lunix-dm-api-901050835625.asia-southeast2.run.app/api/association-rules?${params.toString()}`);
+                const data = await res.json();
+
+                const container = document.querySelector("#data-asosiasi");
+
+                if (!data.rules || data.rules.length === 0) {
+                    container.innerHTML = "<p class='text-gray-500'>Tidak ada aturan asosiasi untuk periode ini.</p>";
+                    return;
+                }
+
+                let html = `
+                    <h3 class='text-md font-semibold mb-4'>Frequent Itemsets</h3>
+                    <ul class='list-disc list-inside text-gray-700 mb-6'>
+                        ${data.frequent_itemsets.map((item, i) =>
+                            `<li><strong>Itemset ${i + 1}:</strong> ${item.itemset.join(", ")} (Support: ${item.support})</li>`
+                        ).join("")}
+                    </ul>
+
+                    <h3 class='text-md font-semibold mb-4'>Association Rules</h3>
+                    <table class="min-w-full text-sm text-left text-gray-700 border">
+                        <thead class="bg-gray-200 text-gray-700 uppercase text-xs">
+                            <tr>
+                                <th class="px-4 py-2">No</th>
+                                <th class="px-4 py-2">Gerakan Sebelumnya</th>
+                                <th class="px-4 py-2">Prediksi Gerakan Setelahnya</th>
+                                <th class="px-4 py-2">Support</th>
+                                <th class="px-4 py-2">Confidence</th>
+                                <th class="px-4 py-2">Lift</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            ${data.rules.map((rule, i) => `
+                                <tr>
+                                    <td class="px-4 py-2">${i + 1}</td>
+                                    <td class="px-4 py-2">${rule.antecedent.join(", ")}</td>
+                                    <td class="px-4 py-2">${rule.consequent.join(", ")}</td>
+                                    <td class="px-4 py-2">${rule.support}</td>
+                                    <td class="px-4 py-2">${rule.confidence}</td>
+                                    <td class="px-4 py-2">${rule.lift}</td>
+                                </tr>
+                            `).join("")}
+                        </tbody>
+                    </table>
+                `;
+
+                container.innerHTML = html;
+            } catch (error) {
+                console.error("Gagal memuat data detail asosiasi:", error);
+                document.querySelector("#data-asosiasi").innerHTML = `<p class="text-red-500">Gagal memuat data detail asosiasi.</p>`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const today = new Date();
+            const day = today.getDate();
+            const month = today.getMonth() + 1; // January = 0
+            const year = today.getFullYear();
+
+            // Populate hari
+            const daySelect = document.getElementById('filterDay');
+            for (let i = 1; i <= 31; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                daySelect.appendChild(option);
+            }
+
+            // Call both initial data loads
+            fetchAssociationData(day, month, year); // For summary
+            renderDetailedAssociation(day, month, year); // For detailed table
+        });
+
+        // Button manual trigger
+        document.querySelector("button").addEventListener("click", async () => {
+            const day = document.getElementById("filterDay").value;
+            const month = document.getElementById("filterMonth").value;
+            const year = document.getElementById("filterYear").value;
+
+            fetchAssociationData(day, month, year);
+            renderDetailedAssociation(day, month, year);
+        });
+
+        document.querySelector("button").addEventListener("click", () => {
+            const day = document.getElementById("filterDay").value;
+            const month = document.getElementById("filterMonth").value;
+            const year = document.getElementById("filterYear").value;
+            fetchAssociationData(day, month, year);
+        });
+    </script>
+    </body>
+</html>
