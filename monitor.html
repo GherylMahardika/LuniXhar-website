@@ -32,9 +32,15 @@
     </style>
 </head>
 
-<body class="flex min-h-screen bg-[#f2f7ff] text-black">
-    <!-- Sidebar -->
-    <aside class="w-64 bg-white border-r rounded-tr-[18px] rounded-br-[18px] fixed top-0 left-0 h-screen flex flex-col items-center z-10">
+<body class="min-h-screen bg-[#f2f7ff] text-black">
+    <button id="menu-btn" class="md:hidden fixed top-4 left-4 z-30 p-2 bg-gray-800 text-white rounded-full">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <div id="menu-overlay" class="md:hidden fixed inset-0 bg-black bg-opacity-50 z-10 hidden"></div>
+
+    <aside id="sidebar" class="w-64 bg-white border-r rounded-r-[18px] fixed top-0 left-0 h-screen flex flex-col items-center z-20
+                               transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
         <div class="p-6 border-b w-full flex justify-center">
             <img src="assets/lunixharlogo.png" alt="Logo" class="h-32 mt-4 mb-4" />
         </div>
@@ -64,29 +70,24 @@
         </nav>
     </aside>
 
-    <!-- Main Content -->
-    <main class="ml-64 flex-1 p-8">
+    <main class="p-4 md:p-8 md:ml-64">
         <h1 class="text-3xl font-bold mb-6">Monitor Kamera</h1>
 
-        <!-- Pilihan Kamera -->
         <section aria-labelledby="pilihan-kamera">
             <h2 id="pilihan-kamera" class="sr-only">Pilihan Kamera</h2>
             <div class="flex flex-wrap justify-center gap-6">
-                <!-- Card 1 -->
                 <div id="cameraCard1" class="camera-card bg-white rounded-xl shadow p-6 flex flex-col items-center w-full sm:w-auto md:w-80 flex-shrink-0 cursor-pointer hover:shadow-lg transition-shadow">
                     <img src="assets/cameraplace1.png" alt="Ikon Kamera 1" class="w-28 h-28 rounded-full object-cover mb-4 border-4 border-gray-200" />
                     <p class="text-lg font-semibold mb-2">Kamera 1 (Stream)</p>
                     <p class="text-sm font-bold text-white bg-green-600 rounded-full px-3 py-1">Online</p>
                 </div>
 
-                <!-- Card 2 -->
                 <div id="cameraCard2" class="camera-card bg-white rounded-xl shadow p-6 flex flex-col items-center w-full sm:w-auto md:w-80 flex-shrink-0 cursor-pointer hover:shadow-lg transition-shadow">
                     <img src="assets/cameraplace2.png" alt="Ikon Kamera 2" class="w-28 h-28 rounded-full object-cover mb-4 border-4 border-gray-200" />
                     <p class="text-lg font-semibold mb-2">Kamera 2 (Laptop / HP)</p>
                     <p class="text-sm font-bold text-white bg-green-600 rounded-full px-3 py-1">Online</p>
                 </div>
 
-                <!-- Card 3 -->
                 <div id="cameraCard3" class="camera-card bg-white rounded-xl shadow p-6 flex flex-col items-center w-full sm:w-auto md:w-80 flex-shrink-0 cursor-pointer hover:shadow-lg transition-shadow">
                     <img src="assets/cameraplace3.png" alt="Ikon Kamera 3" class="w-28 h-28 rounded-full object-cover mb-4 border-4 border-gray-200" />
                     <p class="text-lg font-semibold mb-2">Kamera 3 (DroidCam)</p>
@@ -95,7 +96,6 @@
             </div>
         </section>
 
-        <!-- Tampilan Video Stream dengan Deteksi -->
         <section id="videoStreamSection" aria-labelledby="judul-video-stream" class="mt-8 hidden">
             <div class="bg-white p-6 rounded-xl shadow">
                 <h3 id="judul-video-stream" class="text-xl font-semibold mb-4">Camera Stream</h3>
@@ -107,7 +107,6 @@
         </section>
     </main>
 
-    <!-- Modal Overlay untuk Notifikasi -->
     <div id="modalOverlay" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 opacity-0">
         <div id="modalContent" class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm text-center opacity-0 transform scale-95">
             <div class="mb-4">
@@ -119,10 +118,24 @@
         </div>
     </div>
 
-    <!-- HLS.js -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // --- Logika Hamburger Menu (Ditambahkan) ---
+            const menuBtn = document.getElementById('menu-btn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('menu-overlay');
+
+            function toggleMenu() {
+                sidebar.classList.toggle('-translate-x-full');
+                sidebar.classList.toggle('translate-x-0');
+                overlay.classList.toggle('hidden');
+            }
+
+            if (menuBtn) menuBtn.addEventListener('click', toggleMenu);
+            if (overlay) overlay.addEventListener('click', toggleMenu);
+            
+            // --- Fungsionalitas Asli Monitor Kamera (Tidak Diubah) ---
             let hlsInstance = null;
             let webcamStream = null;
             let socket = null;

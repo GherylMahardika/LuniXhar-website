@@ -28,10 +28,16 @@
     </style>
 </head>
 
-<body class="flex min-h-screen bg-[#f2f7ff] text-black">
+<body class="min-h-screen bg-[#f2f7ff] text-black">
 
-    <!-- Sidebar -->
-    <aside class="w-64 bg-white border-r rounded-tr-[18px] rounded-br-[18px] fixed top-0 left-0 h-screen flex flex-col items-center z-10">
+    <button id="menu-btn" class="md:hidden fixed top-4 left-4 z-30 p-2 bg-gray-800 text-white rounded-full">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <div id="menu-overlay" class="md:hidden fixed inset-0 bg-black bg-opacity-50 z-10 hidden"></div>
+
+    <aside id="sidebar" class="w-64 bg-white border-r rounded-r-[18px] fixed top-0 left-0 h-screen flex flex-col items-center z-20 
+                               transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
         <div class="p-6 border-b w-full flex justify-center">
             <img src="assets/lunixharlogo.png" alt="Logo" class="h-32 mt-4 mb-4" />
         </div>
@@ -61,54 +67,44 @@
         </nav>
     </aside>
 
-    <!-- Main Content -->
-    <main class="ml-64 flex-1 p-6 flex flex-col h-screen">
+    <main class="md:ml-64 flex-1 p-4 md:p-6 flex flex-col h-screen">
         <h1 class="text-3xl font-bold mb-4 text-center flex-shrink-0">Tanyakan Mengenai Tren Hari Ini</h1>
 
-        <!-- Area Chat -->
         <section class="w-full max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-lg flex flex-col flex-grow min-h-0">
 
-            <!-- Kotak Pesan Chat (Akan scrollable) -->
             <div id="chatMessages" class="flex-1 overflow-y-auto space-y-4 pr-2 hide-scrollbar">
-                <!-- Pesan Chat akan dimasukkan di sini oleh JavaScript -->
-            </div>
+                </div>
 
-            <!-- Filter Kata Kunci (Saran Pertanyaan) -->
             <div class="overflow-x-auto hide-scrollbar mt-4 mb-2">
                 <div class="flex gap-4 w-max px-1">
-                    <!-- Grup: Trend -->
                     <div class="flex flex-col bg-gray-100 rounded-xl p-2">
                         <span class="font-semibold text-gray-700 mb-1 px-3 text-sm">Trend</span>
                         <div class="flex flex-wrap gap-2 px-2">
-                            <button class="keyword-btn bg-black text-white px-4 py-2 rounded-full text-sm hover:bg-gray-800 transition-colors">Trend hari ini</button>
+                            <button class="keyword-btn bg-black text-white px-4 py-2 rounded-full text-sm hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed">Trend hari ini</button>
                         </div>
                     </div>
 
-                    <!-- Grup: Asosiasi -->
                     <div class="flex flex-col bg-gray-100 rounded-xl p-2">
                         <span class="font-semibold text-gray-700 mb-1 px-3 text-sm">Asosiasi</span>
                         <div class="flex flex-wrap gap-2 px-2">
-                            <button class="keyword-btn bg-black text-white px-4 py-2 rounded-full text-sm hover:bg-gray-800 transition-colors" data-category="asosiasi">Clapping</button>
-                            <button class="keyword-btn bg-black text-white px-4 py-2 rounded-full text-sm hover:bg-gray-800 transition-colors" data-category="asosiasi">Sitting</button>
-                            <button class="keyword-btn bg-black text-white px-4 py-2 rounded-full text-sm hover:bg-gray-800 transition-colors" data-category="asosiasi">Standing still</button>
-                            <button class="keyword-btn bg-black text-white px-4 py-2 rounded-full text-sm hover:bg-gray-800 transition-colors" data-category="asosiasi">Walking</button>
-                            <button class="keyword-btn bg-black text-white px-4 py-2 rounded-full text-sm hover:bg-gray-800 transition-colors" data-category="asosiasi">Walking with a phone</button>
-                            <button class="keyword-btn bg-black text-white px-4 py-2 rounded-full text-sm hover:bg-gray-800 transition-colors" data-category="asosiasi">Walking with a book</button>
-                            <button class="keyword-btn bg-black text-white px-4 py-2 rounded-full text-sm hover:bg-gray-800 transition-colors" data-category="asosiasi">Meet and split</button>
+                            <button class="keyword-btn bg-black text-white px-4 py-2 rounded-full text-sm hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed" data-category="asosiasi">Clapping</button>
+                            <button class="keyword-btn bg-black text-white px-4 py-2 rounded-full text-sm hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed" data-category="asosiasi">Sitting</button>
+                            <button class="keyword-btn bg-black text-white px-4 py-2 rounded-full text-sm hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed" data-category="asosiasi">Standing still</button>
+                            <button class="keyword-btn bg-black text-white px-4 py-2 rounded-full text-sm hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed" data-category="asosiasi">Walking</button>
+                            <button class="keyword-btn bg-black text-white px-4 py-2 rounded-full text-sm hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed" data-category="asosiasi">Walking with a phone</button>
+                            <button class="keyword-btn bg-black text-white px-4 py-2 rounded-full text-sm hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed" data-category="asosiasi">Walking with a book</button>
+                            <button class="keyword-btn bg-black text-white px-4 py-2 rounded-full text-sm hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed" data-category="asosiasi">Meet and split</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Area Input Pengguna -->
             <div class="relative mt-2 flex-shrink-0">
-                <textarea id="userInput" rows="2" class="w-full p-4 pr-24 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black resize-none" placeholder="Tanyakan sesuatu atau klik ikon mikrofon..."></textarea>
-                <!-- Tombol Mic -->
-                <button id="microphoneButton" class="absolute bottom-3 right-16 bg-black text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-gray-700 transition-colors" aria-label="Gunakan mikrofon">
+                <textarea id="userInput" rows="2" class="w-full p-4 pr-24 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black resize-none disabled:bg-gray-200 disabled:cursor-not-allowed" placeholder="Tanyakan sesuatu atau klik ikon mikrofon..."></textarea>
+                <button id="microphoneButton" class="absolute bottom-3 right-16 bg-black text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-gray-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed" aria-label="Gunakan mikrofon">
                     <i class="fa-solid fa-microphone text-sm"></i>
                 </button>
-                <!-- Tombol Kirim -->
-                <button id="sendButton" class="absolute bottom-3 right-3 bg-black text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-gray-800 transition-colors" aria-label="Kirim pesan">
+                <button id="sendButton" class="absolute bottom-3 right-3 bg-black text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed" aria-label="Kirim pesan">
                     <i class="fa-solid fa-paper-plane text-sm"></i>
                 </button>
             </div>
@@ -117,68 +113,92 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // --- Logika Hamburger Menu ---
+            const menuBtn = document.getElementById('menu-btn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('menu-overlay');
+
+            function toggleMenu() {
+                sidebar.classList.toggle('-translate-x-full');
+                sidebar.classList.toggle('translate-x-0');
+                overlay.classList.toggle('hidden');
+            }
+
+            if (menuBtn) menuBtn.addEventListener('click', toggleMenu);
+            if (overlay) overlay.addEventListener('click', toggleMenu);
+
             // -- Elemen DOM --
             const sendButton = document.getElementById("sendButton");
             const userInput = document.getElementById("userInput");
             const chatMessages = document.getElementById("chatMessages");
             const keywordButtons = document.querySelectorAll('.keyword-btn');
             const microphoneButton = document.getElementById("microphoneButton");
+            
+            // Simpan placeholder asli untuk dikembalikan nanti
+            const originalPlaceholder = userInput.placeholder;
 
             // -- Variabel State Global --
             let activeTtsButton = null;
             let currentUtterance = null;
+            
+            // -- Fungsi-fungsi Baru untuk Mengontrol Input --
 
-            // -- Fungsi-fungsi --
+            // Fungsi untuk menonaktifkan semua input pengguna
+            function disableInput(message = "Mohon tunggu, bot sedang memproses...") {
+                userInput.disabled = true;
+                userInput.placeholder = message;
+                sendButton.disabled = true;
+                microphoneButton.disabled = true;
+                keywordButtons.forEach(btn => btn.disabled = true);
+            }
 
-            /**
-             * Mengontrol pemutaran dan penghentian audio text-to-speech.
-             * @param {string} text - Teks yang akan dibacakan.
-             * @param {HTMLButtonElement} button - Tombol yang diklik.
-             */
+            // Fungsi untuk mengaktifkan kembali semua input pengguna
+            function enableInput() {
+                userInput.disabled = false;
+                userInput.placeholder = originalPlaceholder;
+                sendButton.disabled = false;
+                microphoneButton.disabled = false;
+                keywordButtons.forEach(btn => btn.disabled = false);
+            }
+            
+            // -- Fungsi-fungsi Aplikasi Utama --
+
             function toggleSpeech(text, button) {
                 const wasPlaying = window.speechSynthesis.speaking;
                 const wasSameButton = button === activeTtsButton;
 
-                // Selalu hentikan audio yang mungkin sedang berjalan.
                 if (wasPlaying) {
-                    // Hapus event listener dari utterance sebelumnya untuk mencegahnya mereset ikon
                     if (currentUtterance) {
                         currentUtterance.onend = null;
                     }
-                    // Reset ikon tombol yang aktif sebelumnya secara manual
                     if (activeTtsButton) {
                         activeTtsButton.innerHTML = '<i class="fas fa-volume-up"></i>';
                     }
                     window.speechSynthesis.cancel();
                 }
 
-                // Jika tombol yang sama diklik (fungsi stop), kita selesai di sini.
                 if (wasPlaying && wasSameButton) {
                     activeTtsButton = null;
                     currentUtterance = null;
                     return;
                 }
 
-                // Jika tidak, mulai audio baru.
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'id-ID';
                 utterance.rate = 0.9;
 
-                // Handler saat audio selesai secara alami
                 utterance.onend = () => {
                     button.innerHTML = '<i class="fas fa-volume-up"></i>';
                     activeTtsButton = null;
                     currentUtterance = null;
                 };
 
-                // Perbarui state untuk tombol dan utterance yang baru
                 button.innerHTML = '<i class="fas fa-stop-circle text-red-500"></i>';
                 activeTtsButton = button;
                 currentUtterance = utterance;
 
                 window.speechSynthesis.speak(utterance);
             }
-
 
             function addChatBubble(message, sender = 'user') {
                 const bubble = document.createElement("div");
@@ -202,7 +222,8 @@
                     ttsButton.setAttribute('aria-label', 'Dengarkan pesan');
                     ttsButton.innerHTML = '<i class="fas fa-volume-up"></i>';
                     
-                    ttsButton.onclick = () => toggleSpeech(message, ttsButton);
+                    // Menggunakan addEventListener untuk kehandalan
+                    ttsButton.addEventListener('click', () => toggleSpeech(message, ttsButton));
                     
                     wrapper.appendChild(ttsButton);
                 }
@@ -218,11 +239,13 @@
                 addChatBubble(message, "user");
                 userInput.value = "";
 
+                // Nonaktifkan semua input saat loading dimulai
+                disableInput();
+
                 if (isListening) {
                     recognition.stop();
                 }
 
-                // Tampilkan indikator loading sementara
                 const loadingBubble = document.createElement("div");
                 loadingBubble.className = "max-w-[75%] px-4 py-2 rounded-xl text-sm shadow bg-gray-100 self-start";
                 loadingBubble.textContent = "Sedang memproses...";
@@ -232,7 +255,6 @@
                 chatMessages.appendChild(loadingWrapper);
                 chatMessages.scrollTop = chatMessages.scrollHeight;
 
-                // Panggil API chatbot
                 fetch("https://lunix-chat-bot-api-901050835625.asia-southeast2.run.app/chat", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -240,9 +262,7 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    // Hapus bubble loading
                     chatMessages.removeChild(loadingWrapper);
-
                     const reply = data.response || "Maaf, terjadi kesalahan.";
                     addChatBubble(reply, "bot");
                 })
@@ -250,6 +270,10 @@
                     chatMessages.removeChild(loadingWrapper);
                     console.error("Gagal memanggil API:", error);
                     addChatBubble("Terjadi kesalahan saat memproses permintaan Anda.", "bot");
+                })
+                .finally(() => {
+                    // Aktifkan kembali semua input setelah proses selesai
+                    enableInput();
                 });
             }
 
@@ -272,17 +296,15 @@
                 });
             });
 
-            // -- Logika untuk Speech-to-Text (Mikrofon) --
+            // -- Logika untuk Speech-to-Text (Lengkap) --
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             let recognition;
             let isListening = false;
-            const originalPlaceholder = userInput.placeholder;
-            let finalTranscript = ''; 
 
             if (SpeechRecognition) {
                 recognition = new SpeechRecognition();
                 recognition.continuous = true; 
-                recognition.lang = 'id-ID';    
+                recognition.lang = 'id-ID';     
                 recognition.interimResults = true; 
 
                 microphoneButton.addEventListener('click', () => {
