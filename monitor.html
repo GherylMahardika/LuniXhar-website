@@ -72,21 +72,21 @@
         <section aria-labelledby="pilihan-kamera">
             <h2 id="pilihan-kamera" class="sr-only">Pilihan Kamera</h2>
             <div class="flex flex-wrap justify-center gap-6">
-                <!-- Card 1 - CCTV Stream -->
+                <!-- Card 1 -->
                 <div id="cameraCard1" class="camera-card bg-white rounded-xl shadow p-6 flex flex-col items-center w-full sm:w-auto md:w-80 flex-shrink-0 cursor-pointer hover:shadow-lg transition-shadow">
                     <img src="assets/cameraplace1.png" alt="Ikon Kamera 1" class="w-28 h-28 rounded-full object-cover mb-4 border-4 border-gray-200" />
-                    <p class="text-lg font-semibold mb-2">Kamera 1 (CCTV Stream)</p>
+                    <p class="text-lg font-semibold mb-2">Kamera 1 (Stream)</p>
                     <p class="text-sm font-bold text-white bg-green-600 rounded-full px-3 py-1">Online</p>
                 </div>
 
-                <!-- Card 2 - Laptop/Webcam -->
+                <!-- Card 2 -->
                 <div id="cameraCard2" class="camera-card bg-white rounded-xl shadow p-6 flex flex-col items-center w-full sm:w-auto md:w-80 flex-shrink-0 cursor-pointer hover:shadow-lg transition-shadow">
                     <img src="assets/cameraplace2.png" alt="Ikon Kamera 2" class="w-28 h-28 rounded-full object-cover mb-4 border-4 border-gray-200" />
-                    <p class="text-lg font-semibold mb-2">Kamera 2 (Laptop/Webcam)</p>
+                    <p class="text-lg font-semibold mb-2">Kamera 2 (Laptop)</p>
                     <p class="text-sm font-bold text-white bg-green-600 rounded-full px-3 py-1">Online</p>
                 </div>
 
-                <!-- Card 3 - DroidCam -->
+                <!-- Card 3 -->
                 <div id="cameraCard3" class="camera-card bg-white rounded-xl shadow p-6 flex flex-col items-center w-full sm:w-auto md:w-80 flex-shrink-0 cursor-pointer hover:shadow-lg transition-shadow">
                     <img src="assets/cameraplace3.png" alt="Ikon Kamera 3" class="w-28 h-28 rounded-full object-cover mb-4 border-4 border-gray-200" />
                     <p class="text-lg font-semibold mb-2">Kamera 3 (DroidCam)</p>
@@ -122,15 +122,12 @@
     <!-- HLS.js -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>
-        // Ganti bagian script di monitor.html dengan kode yang diperbaiki ini
-
         document.addEventListener('DOMContentLoaded', function() {
             let hlsInstance = null;
             let webcamStream = null;
             let socket = null;
             let frameInterval = null;
             let activeRequestID = 0;
-            let cctvInterval = null;
 
             const videoStreamSection = document.getElementById("videoStreamSection");
             const videoPlayer = document.getElementById("videoPlayer");
@@ -144,6 +141,7 @@
             const modalMessage = document.getElementById("modalMessage");
             const modalCloseButton = document.getElementById("modalCloseButton");
 
+            // PERUBAHAN: Pastikan actionColors ada di sini
             const actionColors = {
                 "Clapping": "green",
                 "Meet and Split": "blue",
@@ -202,284 +200,49 @@
 
             function stopAllStreams() {
                 activeRequestID++;
-                if (hlsInstance) {
-                    hlsInstance.destroy();
-                    hlsInstance = null;
-                }
-                if (webcamStream) {
-                    webcamStream.getTracks().forEach(track => track.stop());
-                    webcamStream = null;
-                }
-                if (frameInterval) {
-                    clearInterval(frameInterval);
-                    frameInterval = null;
-                }
-                if (cctvInterval) {
-                    clearInterval(cctvInterval);
-                    cctvInterval = null;
-                }
-                if (socket && socket.readyState !== WebSocket.CLOSED) {
-                    socket.close();
-                    socket = null;
-                }
-                
-                // Reset video player
-                const videoPlayer = document.getElementById("videoPlayer");
-                if (videoPlayer) {
-                    videoPlayer.pause();
-                    videoPlayer.removeAttribute("src");
-                    videoPlayer.srcObject = null;
-                    videoPlayer.load();
-                }
-                
-                // Clear canvas
-                const overlayCanvas = document.getElementById("overlayCanvas");
-                if (overlayCanvas) {
-                    const ctx = overlayCanvas.getContext("2d");
-                    ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-                }
-                
+                if (hlsInstance) hlsInstance.destroy();
+                if (webcamStream) webcamStream.getTracks().forEach(track => track.stop());
+                if (frameInterval) clearInterval(frameInterval);
+                if (socket && socket.readyState !== WebSocket.CLOSED) socket.close();
+                hlsInstance = webcamStream = socket = frameInterval = null;
+                videoPlayer.pause();
+                videoPlayer.removeAttribute("src");
+                videoPlayer.srcObject = null;
+                videoPlayer.load();
+                canvasContext.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
                 videoStreamSection.classList.add("hidden");
             }
 
-            // Fungsi khusus untuk CCTV Stream dengan WebSocket
-            async function startCCTVStream(cameraId) {
-                stopAllStreams();
-                const requestID = ++activeRequestID;
-                
-                try {
-                    videoStreamSection.classList.remove("hidden");
-                    document.getElementById("judul-video-stream").innerText = "Camera 1 (CCTV Stream)";
-                    
-                    // Setup WebSocket terlebih dahulu
-                    await setupWebSocketForCCTV(cameraId, requestID);
-                    
-                    // Buat container untuk CCTV stream
-                    const videoContainer = document.getElementById("videoContainer");
-                    videoContainer.innerHTML = `
-                        <img id="cctvImage" src="http://127.0.0.1:8000/video_feed" 
-                            style="width: 100%; height: auto; display: block; background: #000;" 
-                            alt="CCTV Stream" crossorigin="anonymous" />
-                        <canvas id="overlayCanvas" class="absolute top-0 left-0 w-full h-full pointer-events-none"></canvas>
-                    `;
-                    
-                    const cctvImage = document.getElementById('cctvImage');
-                    const newOverlayCanvas = document.getElementById('overlayCanvas');
-                    
-                    // Handle image load
-                    cctvImage.onload = function() {
-                        console.log('✅ CCTV stream loaded successfully');
-                        // Update canvas size to match image
-                        newOverlayCanvas.width = this.naturalWidth || this.clientWidth;
-                        newOverlayCanvas.height = this.naturalHeight || this.clientHeight;
-                        
-                        // Mulai mengirim frame untuk deteksi
-                        startSendingCCTVFrames(cctvImage, requestID);
-                    };
-                    
-                    cctvImage.onerror = function() {
-                        console.error('❌ Failed to load CCTV stream');
-                        showModal("Error", "Gagal memuat stream CCTV. Pastikan server Flask berjalan di http://127.0.0.1:8000");
-                    };
-                    
-                } catch (error) {
-                    console.error("❌ CCTV Stream Error:", error);
-                    showModal("Kesalahan", error.message || "Gagal memulai stream CCTV.");
-                }
-            }
-
-            // Setup WebSocket khusus untuk CCTV
-            function setupWebSocketForCCTV(cameraId, requestID) {
-                return new Promise((resolve, reject) => {
-                    if (requestID !== activeRequestID) {
-                        return reject(new Error("Permintaan usang."));
-                    }
-
-                    console.log(`🔌 Connecting WebSocket for CCTV camera ${cameraId}...`);
-                    const ws = new WebSocket("wss://lunix-har-api-901050835625.asia-southeast2.run.app/ws");
-
-                    ws.onopen = () => {
-                        if (requestID !== activeRequestID) {
-                            ws.close();
-                            return;
-                        }
-                        console.log('✅ WebSocket connected for CCTV');
-                        
-                        // Kirim camera_id untuk inisialisasi
-                        const initMessage = JSON.stringify({ camera_id: cameraId });
-                        ws.send(initMessage);
-                        console.log(`📤 Sent camera_id: ${cameraId}`);
-                        
-                        socket = ws;
-                        resolve();
-                    };
-
-                    ws.onmessage = (event) => {
-                        try {
-                            const data = JSON.parse(event.data);
-                            console.log('📨 Received detection data:', data);
-                            
-                            if (data.detections && Array.isArray(data.detections)) {
-                                drawDetectionsOnCCTV(data.detections);
-                            }
-                        } catch (err) {
-                            console.error("❌ Failed to parse detection message:", err);
-                        }
-                    };
-
-                    ws.onerror = (err) => {
-                        console.error("❌ WebSocket error:", err);
-                        reject(new Error("Gagal terhubung ke server deteksi."));
-                    };
-
-                    ws.onclose = (event) => {
-                        console.log(`🔌 WebSocket closed for CCTV (code: ${event.code})`);
-                        if (requestID === activeRequestID) {
-                            showModal("Terputus", "Koneksi ke server deteksi terputus.");
-                        }
-                    };
-                });
-            }
-
-            // Mulai mengirim frame CCTV secara berkala
-            function startSendingCCTVFrames(imgElement, requestID) {
-                if (cctvInterval) clearInterval(cctvInterval);
-                
-                cctvInterval = setInterval(() => {
-                    if (requestID !== activeRequestID) {
-                        clearInterval(cctvInterval);
-                        return;
-                    }
-                    sendCCTVFrame(imgElement, requestID);
-                }, 500); // Kirim frame setiap 500ms
-                
-                console.log('🎬 Started sending CCTV frames for detection');
-            }
-
-            // Kirim frame CCTV ke WebSocket
-            function sendCCTVFrame(imgElement, requestID) {
-                if (!imgElement || !socket || socket.readyState !== WebSocket.OPEN || requestID !== activeRequestID) {
-                    return;
-                }
-
-                try {
-                    // Buat canvas temporary untuk capture frame
-                    const tempCanvas = document.createElement("canvas");
-                    const ctx = tempCanvas.getContext("2d");
-                    
-                    // Set ukuran canvas sesuai gambar
-                    tempCanvas.width = imgElement.naturalWidth || imgElement.clientWidth;
-                    tempCanvas.height = imgElement.naturalHeight || imgElement.clientHeight;
-                    
-                    // Gambar image ke canvas
-                    ctx.drawImage(imgElement, 0, 0, tempCanvas.width, tempCanvas.height);
-                    
-                    // Convert ke blob dan kirim
-                    tempCanvas.toBlob(blob => {
-                        if (blob && requestID === activeRequestID && socket && socket.readyState === WebSocket.OPEN) {
-                            blob.arrayBuffer().then(buffer => {
-                                socket.send(buffer);
-                                console.log('📤 Sent CCTV frame for detection');
-                            }).catch(err => {
-                                console.error('❌ Error converting blob to buffer:', err);
-                            });
-                        }
-                    }, 'image/jpeg', 0.8);
-                    
-                } catch (error) {
-                    console.error('❌ Error sending CCTV frame:', error);
-                }
-            }
-
-            // Gambar deteksi pada overlay canvas CCTV
-            function drawDetectionsOnCCTV(detections) {
-                const overlayCanvas = document.getElementById('overlayCanvas');
-                if (!overlayCanvas) return;
-                
-                const canvasContext = overlayCanvas.getContext('2d');
-                
-                // Clear previous drawings
-                canvasContext.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-
-                if (detections.length > 0) {
-                    console.log(`🎯 Drawing ${detections.length} detections on CCTV`);
-                    
-                    detections.forEach(det => {
-                        const [x1, y1, x2, y2] = det.bbox;
-                        const width = x2 - x1;
-                        const height = y2 - y1;
-                        const label = det.label || 'Unknown';
-                        const id = det.person_id || 0;
-                        const confidence = Math.min((det.confidence || 0) * 100, 100).toFixed(1);
-                        const color = actionColors[label] || "lime";
-
-                        // Draw bounding box
-                        canvasContext.strokeStyle = color;
-                        canvasContext.lineWidth = 3;
-                        canvasContext.strokeRect(x1, y1, width, height);
-
-                        // Draw label background
-                        const text = `#${id} ${label} (${confidence}%)`;
-                        canvasContext.font = "16px Arial";
-                        const textMetrics = canvasContext.measureText(text);
-                        const textWidth = textMetrics.width;
-                        const textHeight = 20;
-                        
-                        // Background for text
-                        canvasContext.fillStyle = color;
-                        canvasContext.fillRect(x1, y1 - textHeight - 4, textWidth + 8, textHeight + 4);
-                        
-                        // Text
-                        canvasContext.fillStyle = "white";
-                        canvasContext.fillText(text, x1 + 4, y1 - 6);
-                    });
-                }
-            }
-
-            // Fungsi untuk webcam/droidcam (tidak diubah)
             async function startStreamAndDetection(sourceType, cameraId, videoSrc = null) {
                 stopAllStreams();
-                const requestID = ++activeRequestID;
+                const requestID = activeRequestID;
                 videoStreamSection.classList.remove("hidden");
                 let localStream = null;
 
                 try {
-                    // Reset video container ke struktur original
-                    const videoContainer = document.getElementById("videoContainer");
-                    videoContainer.innerHTML = `
-                        <video id="videoPlayer" class="block w-full h-auto" autoplay muted playsinline></video>
-                        <canvas id="overlayCanvas" class="absolute top-0 left-0 w-full h-full"></canvas>
-                    `;
-                    
-                    const newVideoPlayer = document.getElementById("videoPlayer");
-                    const newOverlayCanvas = document.getElementById("overlayCanvas");
-                    const newCanvasContext = newOverlayCanvas.getContext("2d");
-
                     if (sourceType === "hls") {
                         if (Hls.isSupported()) {
                             hlsInstance = new Hls();
                             hlsInstance.loadSource(videoSrc);
-                            hlsInstance.attachMedia(newVideoPlayer);
+                            hlsInstance.attachMedia(videoPlayer);
                         } else {
                             throw new Error("Browser tidak mendukung HLS.");
                         }
                     } else {
-                        await navigator.mediaDevices.getUserMedia({ video: true });
+                        let constraints = { video: true };
                         const devices = await navigator.mediaDevices.enumerateDevices();
                         const cameras = devices.filter(d => d.kind === "videoinput");
-                        console.log("Detected cameras:", cameras);
-                        let selectedCamera;
 
                         if (sourceType === "webcam-droidcam") {
                             const droidCam = cameras.find(d => d.label.toLowerCase().includes("droidcam"));
                             if (!droidCam) throw new Error("DroidCam tidak terdeteksi.");
-                            selectedCamera = droidCam;
+                            constraints.video = { deviceId: { exact: droidCam.deviceId } };
                         } else if (sourceType === "webcam-default") {
-                            selectedCamera = cameras.find(d => d.label.includes("USB2.0 HD UVC WebCam"));
-                            if (!selectedCamera) throw new Error("Kamera USB tidak ditemukan.");
+                            let defaultCam = cameras.find(d => !d.label.toLowerCase().includes("droidcam"));
+                            if (!defaultCam && cameras.length > 0) defaultCam = cameras[0];
+                            if (!defaultCam) throw new Error("Tidak ada kamera yang tersedia.");
+                            constraints.video = { deviceId: { exact: defaultCam.deviceId } };
                         }
-
-                        const constraints = { video: { deviceId: { exact: selectedCamera.deviceId } } };
                         localStream = await navigator.mediaDevices.getUserMedia(constraints);
                     }
 
@@ -490,19 +253,18 @@
 
                     if (localStream) {
                         webcamStream = localStream;
-                        newVideoPlayer.srcObject = webcamStream;
+                        videoPlayer.srcObject = webcamStream;
                     }
                     
-                    await newVideoPlayer.play();
-                    await setupWebSocket(cameraId, requestID, newCanvasContext, newOverlayCanvas, newVideoPlayer);
+                    await videoPlayer.play();
+                    await setupWebSocket(cameraId, requestID);
 
                 } catch (error) {
-                    console.error("Start Stream Error:", error);
                     showModal("Kesalahan", error.message || "Gagal memulai stream.");
                 }
             }
 
-            function setupWebSocket(cameraId, requestID, canvasContext, canvas, videoPlayer) {
+            function setupWebSocket(cameraId, requestID) {
                 return new Promise((resolve, reject) => {
                     if (requestID !== activeRequestID) return reject(new Error("Permintaan usang."));
 
@@ -512,41 +274,41 @@
                         if (requestID !== activeRequestID) return ws.close();
                         ws.send(JSON.stringify({ camera_id: cameraId }));
                         socket = ws;
-                        frameInterval = setInterval(() => sendFrame(requestID, videoPlayer), 500);
+                        frameInterval = setInterval(() => sendFrame(requestID), 500);
                         resolve();
                     };
 
                     ws.onmessage = (event) => {
+                        if (requestID !== activeRequestID) return;
                         try {
                             const data = JSON.parse(event.data);
                             const detections = data.detections;
 
-                            canvas.width = videoPlayer.videoWidth || canvas.width;
-                            canvas.height = videoPlayer.videoHeight || canvas.height;
-                            canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+                            overlayCanvas.width = videoPlayer.videoWidth;
+                            overlayCanvas.height = videoPlayer.videoHeight;
+                            canvasContext.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
 
                             if (Array.isArray(detections)) {
                                 detections.forEach(det => {
                                     const [x1, y1, x2, y2] = det.bbox;
                                     const width = x2 - x1;
                                     const height = y2 - y1;
-                                    const label = det.label;
-                                    const id = det.person_id;
-                                    const confidence = Math.min(det.confidence * 100, 100).toFixed(1);
-                                    const color = actionColors[label] || "lime";
+                                    
+                                    // PERUBAHAN: Gunakan actionColors untuk menentukan warna
+                                    const color = actionColors[det.label] || 'lime'; // Default ke 'lime' jika label tidak ditemukan
 
                                     canvasContext.strokeStyle = color;
                                     canvasContext.lineWidth = 2;
                                     canvasContext.strokeRect(x1, y1, width, height);
-
-                                    const text = `#${id} ${label} (${confidence}%)`;
-                                    canvasContext.font = "14px Arial";
+                                    
+                                    const text = `#${det.person_id} ${det.label} (${(det.confidence * 100).toFixed(1)}%)`;
+                                    canvasContext.font = "16px Arial";
                                     canvasContext.fillStyle = color;
-                                    canvasContext.fillText(text, x1 + 4, y1 + 16);
+                                    canvasContext.fillText(text, x1 + 4, y1 - 5); // Sesuaikan posisi teks agar di atas kotak
                                 });
                             }
-                        } catch (err) {
-                            console.error("Failed to parse detection message:", err);
+                        } catch (e) {
+                            console.error("Gagal memproses pesan:", e);
                         }
                     };
 
@@ -565,7 +327,7 @@
                 });
             }
 
-            function sendFrame(requestID, videoPlayer) {
+            function sendFrame(requestID) {
                 if (!videoPlayer || !socket || socket.readyState !== WebSocket.OPEN || requestID !== activeRequestID) {
                     if(frameInterval) clearInterval(frameInterval);
                     return;
@@ -586,16 +348,9 @@
                 }, 'image/jpeg');
             }
 
-            // Event listeners for camera cards
-            document.getElementById("cameraCard1").addEventListener("click", () => startCCTVStream(1));
-            document.getElementById("cameraCard2").addEventListener("click", () => {
-                document.getElementById("judul-video-stream").innerText = "Camera 2 (Laptop/Webcam)";
-                startStreamAndDetection("webcam-default", 2);
-            });
-            document.getElementById("cameraCard3").addEventListener("click", () => {
-                document.getElementById("judul-video-stream").innerText = "Camera 3 (DroidCam)";
-                startStreamAndDetection("webcam-droidcam", 3);
-            });
+            document.getElementById("cameraCard1").addEventListener("click", () => startStreamAndDetection("hls", 1, "video/stream1.m3u8"));
+            document.getElementById("cameraCard2").addEventListener("click", () => startStreamAndDetection("webcam-default", 2));
+            document.getElementById("cameraCard3").addEventListener("click", () => startStreamAndDetection("webcam-droidcam", 3));
         });
     </script>
 </body>
