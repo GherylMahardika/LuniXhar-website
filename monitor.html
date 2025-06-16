@@ -82,7 +82,7 @@
                 <!-- Card 2 -->
                 <div id="cameraCard2" class="camera-card bg-white rounded-xl shadow p-6 flex flex-col items-center w-full sm:w-auto md:w-80 flex-shrink-0 cursor-pointer hover:shadow-lg transition-shadow">
                     <img src="assets/cameraplace2.png" alt="Ikon Kamera 2" class="w-28 h-28 rounded-full object-cover mb-4 border-4 border-gray-200" />
-                    <p class="text-lg font-semibold mb-2">Kamera 2 (Laptop)</p>
+                    <p class="text-lg font-semibold mb-2">Kamera 2 (Laptop / HP)</p>
                     <p class="text-sm font-bold text-white bg-green-600 rounded-full px-3 py-1">Online</p>
                 </div>
 
@@ -141,15 +141,10 @@
             const modalMessage = document.getElementById("modalMessage");
             const modalCloseButton = document.getElementById("modalCloseButton");
 
-            // PERUBAHAN: Pastikan actionColors ada di sini
             const actionColors = {
-                "Clapping": "green",
-                "Meet and Split": "blue",
-                "Sitting": "red",
-                "Standing Still": "yellow",
-                "Walking": "magenta",
-                "Walking While Reading Book": "cyan",
-                "Walking While Using Phone": "purple",
+                "Clapping": "green", "Meet and Split": "blue", "Sitting": "red",
+                "Standing Still": "yellow", "Walking": "magenta", 
+                "Walking While Reading Book": "cyan", "Walking While Using Phone": "purple",
                 "Unknown": "gray"
             };
 
@@ -229,7 +224,7 @@
                             throw new Error("Browser tidak mendukung HLS.");
                         }
                     } else {
-                        let constraints = { video: true };
+                        let constraints = {};
                         const devices = await navigator.mediaDevices.enumerateDevices();
                         const cameras = devices.filter(d => d.kind === "videoinput");
 
@@ -237,11 +232,13 @@
                             const droidCam = cameras.find(d => d.label.toLowerCase().includes("droidcam"));
                             if (!droidCam) throw new Error("DroidCam tidak terdeteksi.");
                             constraints.video = { deviceId: { exact: droidCam.deviceId } };
-                        } else if (sourceType === "webcam-default") {
-                            let defaultCam = cameras.find(d => !d.label.toLowerCase().includes("droidcam"));
-                            if (!defaultCam && cameras.length > 0) defaultCam = cameras[0];
-                            if (!defaultCam) throw new Error("Tidak ada kamera yang tersedia.");
-                            constraints.video = { deviceId: { exact: defaultCam.deviceId } };
+                        } else { // webcam-default
+                            const defaultCam = cameras.find(d => !d.label.toLowerCase().includes("droidcam"));
+                            if (defaultCam) {
+                                constraints.video = { deviceId: { exact: defaultCam.deviceId } };
+                            } else {
+                                constraints.video = { facingMode: "user" };
+                            }
                         }
                         localStream = await navigator.mediaDevices.getUserMedia(constraints);
                     }
@@ -294,8 +291,7 @@
                                     const width = x2 - x1;
                                     const height = y2 - y1;
                                     
-                                    // PERUBAHAN: Gunakan actionColors untuk menentukan warna
-                                    const color = actionColors[det.label] || 'lime'; // Default ke 'lime' jika label tidak ditemukan
+                                    const color = actionColors[det.label] || 'lime';
 
                                     canvasContext.strokeStyle = color;
                                     canvasContext.lineWidth = 2;
@@ -304,7 +300,7 @@
                                     const text = `#${det.person_id} ${det.label} (${(det.confidence * 100).toFixed(1)}%)`;
                                     canvasContext.font = "16px Arial";
                                     canvasContext.fillStyle = color;
-                                    canvasContext.fillText(text, x1 + 4, y1 - 5); // Sesuaikan posisi teks agar di atas kotak
+                                    canvasContext.fillText(text, x1 + 4, y1 - 5);
                                 });
                             }
                         } catch (e) {
