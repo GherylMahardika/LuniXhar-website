@@ -98,7 +98,11 @@
 
         <section id="videoStreamSection" aria-labelledby="judul-video-stream" class="mt-8 hidden">
             <div class="bg-white p-6 rounded-xl shadow">
-                <h3 id="judul-video-stream" class="text-xl font-semibold mb-4">Camera Stream</h3>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 id="judul-video-stream" class="text-xl font-semibold">Camera Stream</h3>
+                    <select id="camera-select" class="hidden p-2 border border-gray-300 rounded-lg text-sm focus:ring-black focus:border-black">
+                        </select>
+                </div>
                 <div id="videoContainer" class="relative bg-black rounded-lg overflow-hidden">
                     <video id="videoPlayer" class="block w-full h-auto" autoplay muted playsinline></video>
                     <canvas id="overlayCanvas" class="absolute top-0 left-0 w-full h-full"></canvas>
@@ -141,11 +145,14 @@
             let socket = null;
             let frameInterval = null;
             let activeRequestID = 0;
+            let currentSourceType = null;
+            let currentCameraId = null;
 
             const videoStreamSection = document.getElementById("videoStreamSection");
             const videoPlayer = document.getElementById("videoPlayer");
             const overlayCanvas = document.getElementById("overlayCanvas");
             const canvasContext = overlayCanvas.getContext("2d");
+            const cameraSelect = document.getElementById("camera-select");
 
             const modalOverlay = document.getElementById("modalOverlay");
             const modalContent = document.getElementById("modalContent");
@@ -160,6 +167,39 @@
                 "Walking While Reading Book": "cyan", "Walking While Using Phone": "purple",
                 "Unknown": "gray"
             };
+
+            async function populateCameraDropdown(currentStream) {
+                try {
+                    await navigator.mediaDevices.getUserMedia({ video: true });
+                    const devices = await navigator.mediaDevices.enumerateDevices();
+                    const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                    
+                    cameraSelect.innerHTML = '';
+                    videoDevices.forEach((device, index) => {
+                        const option = document.createElement('option');
+                        option.value = device.deviceId;
+                        option.textContent = device.label || `Kamera ${index + 1}`;
+                        cameraSelect.appendChild(option);
+                    });
+
+                    if (currentStream) {
+                        const currentDeviceId = currentStream.getVideoTracks()[0].getSettings().deviceId;
+                        cameraSelect.value = currentDeviceId;
+                    }
+
+                    cameraSelect.classList.remove('hidden');
+                } catch (err) {
+                    console.error("Tidak bisa mendapatkan daftar kamera:", err);
+                    cameraSelect.classList.add('hidden');
+                }
+            }
+            
+            cameraSelect.addEventListener('change', (event) => {
+                const selectedDeviceId = event.target.value;
+                if (selectedDeviceId && currentSourceType) {
+                    startStreamAndDetection(currentSourceType, currentCameraId, null, selectedDeviceId);
+                }
+            });
 
             function showModal(title, message, type = "error") {
                 modalTitle.textContent = title;
@@ -219,16 +259,22 @@
                 videoPlayer.load();
                 canvasContext.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
                 videoStreamSection.classList.add("hidden");
+                cameraSelect.classList.add('hidden');
             }
-
-            async function startStreamAndDetection(sourceType, cameraId, videoSrc = null) {
+            
+            async function startStreamAndDetection(sourceType, cameraId, videoSrc = null, specificDeviceId = null) {
                 stopAllStreams();
                 const requestID = activeRequestID;
                 videoStreamSection.classList.remove("hidden");
+                
+                currentSourceType = sourceType;
+                currentCameraId = cameraId;
+
                 let localStream = null;
 
                 try {
                     if (sourceType === "hls") {
+                        cameraSelect.classList.add('hidden');
                         if (Hls.isSupported()) {
                             hlsInstance = new Hls();
                             hlsInstance.loadSource(videoSrc);
@@ -238,21 +284,21 @@
                         }
                     } else {
                         let constraints = {};
-                        const devices = await navigator.mediaDevices.enumerateDevices();
-                        const cameras = devices.filter(d => d.kind === "videoinput");
-
-                        if (sourceType === "webcam-droidcam") {
-                            const droidCam = cameras.find(d => d.label.toLowerCase().includes("droidcam"));
-                            if (!droidCam) throw new Error("DroidCam tidak terdeteksi.");
-                            constraints.video = { deviceId: { exact: droidCam.deviceId } };
-                        } else { // webcam-default
-                            const defaultCam = cameras.find(d => !d.label.toLowerCase().includes("droidcam"));
-                            if (defaultCam) {
-                                constraints.video = { deviceId: { exact: defaultCam.deviceId } };
+                        if (specificDeviceId) {
+                            constraints.video = { deviceId: { exact: specificDeviceId } };
+                        } else {
+                            const devices = await navigator.mediaDevices.enumerateDevices();
+                            const cameras = devices.filter(d => d.kind === "videoinput");
+                            if (sourceType === "webcam-droidcam") {
+                                const droidCam = cameras.find(d => d.label.toLowerCase().includes("droidcam"));
+                                if (!droidCam) throw new Error("DroidCam tidak terdeteksi.");
+                                constraints.video = { deviceId: { exact: droidCam.deviceId } };
                             } else {
-                                constraints.video = { facingMode: "user" };
+                                const defaultCam = cameras.find(d => !d.label.toLowerCase().includes("droidcam"));
+                                constraints.video = defaultCam ? { deviceId: { exact: defaultCam.deviceId } } : { facingMode: "user" };
                             }
                         }
+                        
                         localStream = await navigator.mediaDevices.getUserMedia(constraints);
                     }
 
@@ -264,6 +310,7 @@
                     if (localStream) {
                         webcamStream = localStream;
                         videoPlayer.srcObject = webcamStream;
+                        await populateCameraDropdown(webcamStream);
                     }
                     
                     await videoPlayer.play();
@@ -271,6 +318,7 @@
 
                 } catch (error) {
                     showModal("Kesalahan", error.message || "Gagal memulai stream.");
+                    stopAllStreams();
                 }
             }
 
@@ -303,28 +351,20 @@
                                     const [x1, y1, x2, y2] = det.bbox;
                                     const width = x2 - x1;
                                     const height = y2 - y1;
-                                    
                                     const color = actionColors[det.label] || 'lime';
 
-                                    // Menggambar kotak (bounding box)
                                     canvasContext.strokeStyle = color;
                                     canvasContext.lineWidth = 2;
                                     canvasContext.strokeRect(x1, y1, width, height);
                                     
-                                    // --- [REVISI] Logika Menggambar Teks Label ---
-
                                     const fontSize = 16;
                                     const padding = 5;
-
-                                    // Mengatur properti font
                                     canvasContext.font = `${fontSize}px Arial`;
                                     canvasContext.fillStyle = color;
 
-                                    // Teks 1: Person ID (di luar kotak, di atas)
                                     const textId = `Person_Id: ${det.person_id}`;
                                     canvasContext.fillText(textId, x1 + padding, y1 - padding);
 
-                                    // Teks 2: Label Aksi (di dalam kotak, di atas)
                                     const textLabel = det.label;
                                     canvasContext.fillText(textLabel, x1 + padding, y1 + fontSize + padding);
                                 });
