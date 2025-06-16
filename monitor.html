@@ -121,7 +121,7 @@
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // --- Logika Hamburger Menu (Ditambahkan) ---
+            // --- Logika Hamburger Menu ---
             const menuBtn = document.getElementById('menu-btn');
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('menu-overlay');
@@ -135,7 +135,7 @@
             if (menuBtn) menuBtn.addEventListener('click', toggleMenu);
             if (overlay) overlay.addEventListener('click', toggleMenu);
             
-            // --- Fungsionalitas Asli Monitor Kamera (Tidak Diubah) ---
+            // --- Fungsionalitas Monitor Kamera ---
             let hlsInstance = null;
             let webcamStream = null;
             let socket = null;
@@ -306,14 +306,27 @@
                                     
                                     const color = actionColors[det.label] || 'lime';
 
+                                    // Menggambar kotak (bounding box)
                                     canvasContext.strokeStyle = color;
                                     canvasContext.lineWidth = 2;
                                     canvasContext.strokeRect(x1, y1, width, height);
                                     
-                                    const text = `#${det.person_id} ${det.label} (${(det.confidence * 100).toFixed(1)}%)`;
-                                    canvasContext.font = "16px Arial";
+                                    // --- [REVISI] Logika Menggambar Teks Label ---
+
+                                    const fontSize = 16;
+                                    const padding = 5;
+
+                                    // Mengatur properti font
+                                    canvasContext.font = `${fontSize}px Arial`;
                                     canvasContext.fillStyle = color;
-                                    canvasContext.fillText(text, x1 + 4, y1 - 5);
+
+                                    // Teks 1: Person ID (di luar kotak, di atas)
+                                    const textId = `Person_Id: ${det.person_id}`;
+                                    canvasContext.fillText(textId, x1 + padding, y1 - padding);
+
+                                    // Teks 2: Label Aksi (di dalam kotak, di atas)
+                                    const textLabel = det.label;
+                                    canvasContext.fillText(textLabel, x1 + padding, y1 + fontSize + padding);
                                 });
                             }
                         } catch (e) {
