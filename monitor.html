@@ -32,9 +32,18 @@
     </style>
 </head>
 
-<body class="flex min-h-screen bg-[#f2f7ff] text-black">
+<body class="bg-[#f2f7ff] text-black">
+    <!-- Tombol Hamburger untuk Mobile/Tablet -->
+    <button id="menu-btn" class="md:hidden fixed top-4 left-4 z-30 p-2 bg-gray-800 text-white rounded-full">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Overlay untuk menu mobile -->
+    <div id="menu-overlay" class="md:hidden fixed inset-0 bg-black bg-opacity-50 z-10 hidden"></div>
+
     <!-- Sidebar -->
-    <aside class="w-64 bg-white border-r rounded-tr-[18px] rounded-br-[18px] fixed top-0 left-0 h-screen flex flex-col items-center z-10">
+   <aside id="sidebar" class="w-64 bg-white border-r rounded-r-[18px] fixed top-0 left-0 h-screen flex flex-col items-center z-20 
+                       transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
         <div class="p-6 border-b w-full flex justify-center">
             <img src="assets/lunixharlogo.png" alt="Logo" class="h-32 mt-4 mb-4" />
         </div>
@@ -65,7 +74,7 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="ml-64 flex-1 p-8">
+    <main class="p-4 md:p-8 md:ml-64">
         <h1 class="text-3xl font-bold mb-6">Monitor Kamera</h1>
 
         <!-- Pilihan Kamera -->
@@ -124,6 +133,26 @@
 
     <!-- HLS.js -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const menuBtn = document.getElementById('menu-btn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('menu-overlay');
+
+            function toggleMenu() {
+                sidebar.classList.toggle('-translate-x-full');
+                sidebar.classList.toggle('translate-x-0');
+                overlay.classList.toggle('hidden');
+            }
+
+            if (menuBtn) {
+                menuBtn.addEventListener('click', toggleMenu);
+            }
+            if (overlay) {
+                overlay.addEventListener('click', toggleMenu);
+            }
+        });
+    </script>
     <script>
         // Ganti bagian script di monitor.html dengan kode yang diperbaiki ini
 
