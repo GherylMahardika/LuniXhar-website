@@ -293,47 +293,49 @@
             async function startCCTVStream(cameraId) {
                 stopAllStreams();
                 const requestID = ++activeRequestID;
-                
+
                 try {
                     videoStreamSection.classList.remove("hidden");
                     document.getElementById("judul-video-stream").innerText = "Camera 1 (CCTV Stream)";
-                    
-                    // Setup WebSocket terlebih dahulu
-                    await setupWebSocketForCCTV(cameraId, requestID);
-                    
-                    // Buat container untuk CCTV stream
+
+                    // Reset video container
                     const videoContainer = document.getElementById("videoContainer");
                     videoContainer.innerHTML = `
-                        <img id="cctvImage" src="https://lunixhar.lunixmous.my.id//video_feed" 
-                            style="width: 100%; height: auto; display: block; background: #000;" 
-                            alt="CCTV Stream" crossorigin="anonymous" />
+                        <video id="videoPlayer" class="block w-full h-auto" autoplay muted playsinline controls></video>
                         <canvas id="overlayCanvas" class="absolute top-0 left-0 w-full h-full pointer-events-none"></canvas>
                     `;
-                    
-                    const cctvImage = document.getElementById('cctvImage');
-                    const newOverlayCanvas = document.getElementById('overlayCanvas');
-                    
-                    // Handle image load
-                    cctvImage.onload = function() {
-                        console.log('✅ CCTV stream loaded successfully');
-                        // Update canvas size to match image
-                        newOverlayCanvas.width = this.naturalWidth || this.clientWidth;
-                        newOverlayCanvas.height = this.naturalHeight || this.clientHeight;
-                        
-                        // Mulai mengirim frame untuk deteksi
-                        startSendingCCTVFrames(cctvImage, requestID);
-                    };
-                    
-                    cctvImage.onerror = function() {
-                        console.error('❌ Failed to load CCTV stream');
-                        showModal("Error", "Gagal memuat stream CCTV. Pastikan server Flask berjalan di http://127.0.0.1:8000");
-                    };
-                    
+
+                    const newVideoPlayer = document.getElementById("videoPlayer");
+                    const newOverlayCanvas = document.getElementById("overlayCanvas");
+                    const newCanvasContext = newOverlayCanvas.getContext("2d");
+
+                    const hlsSource = "https://lunixhar.lunixmous.my.id/static/stream.m3u8"; // update this URL as needed
+
+                    if (Hls.isSupported()) {
+                        hlsInstance = new Hls();
+                        hlsInstance.loadSource(hlsSource);
+                        hlsInstance.attachMedia(newVideoPlayer);
+                        hlsInstance.on(Hls.Events.MANIFEST_PARSED, function () {
+                            newVideoPlayer.play();
+                        });
+                    } else if (newVideoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+                        newVideoPlayer.src = hlsSource;
+                        newVideoPlayer.addEventListener('loadedmetadata', function () {
+                            newVideoPlayer.play();
+                        });
+                    } else {
+                        throw new Error("Browser tidak mendukung HLS.");
+                    }
+
+                    // You can optionally call detection setup here, if needed:
+                    await setupWebSocket(cameraId, requestID, newCanvasContext, newOverlayCanvas, newVideoPlayer);
+
                 } catch (error) {
                     console.error("❌ CCTV Stream Error:", error);
-                    showModal("Kesalahan", error.message || "Gagal memulai stream CCTV.");
+                    showModal("Kesalahan", error.message || "Gagal memuat stream CCTV.");
                 }
             }
+
 
             // Setup WebSocket khusus untuk CCTV
             function setupWebSocketForCCTV(cameraId, requestID) {
